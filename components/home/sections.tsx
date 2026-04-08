@@ -161,9 +161,9 @@ export function ReviewsSection() {
       <div className="reveal zero-margin-bottom">
         <div className="section-label">Opinie</div>
         <h2>
-          KLIENCI
+          CO MÓWIĄ O NAS
           <br />
-          <span className="accent">MÓWIĄ</span>
+          <span className="accent">KLIENCI</span>
         </h2>
         <div className="reviews-score">
           <div className="reviews-score-value">5.0</div>

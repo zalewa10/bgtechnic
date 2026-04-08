@@ -1661,7 +1661,8 @@ footer {
   }
 
   .contact-grid {
-    grid-template-columns: 1fr;
+    display:flex;
+    flex-direction: column-reverse;
   }
 
   .hero-stats {

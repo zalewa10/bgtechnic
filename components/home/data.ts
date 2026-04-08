@@ -244,7 +244,7 @@ export const TRACK_EXPERIENCE = {
   years: "15+",
   races: "200+",
   trophies: "45+",
-  description: "Zespół BGTechnic z dumą dzieli się doświadczeniem nabytym na profesjonalnych torach wyścigowych. Nasze mechaniki serwisują motocykle startujące w endurance'ach, trackdays i amatorskich wyścigach.",
+  description: "Zespół BGTechnic z dumą dzieli się doświadczeniem nabytym na profesjonalnych torach wyścigowych.",
   highlights: [
     { label: "Lat doświadczenia wyścigowego", value: "15+" },
     { label: "Startów na torze", value: "200+" },
