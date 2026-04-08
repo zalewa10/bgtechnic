@@ -139,7 +139,7 @@ export const BRANDS = [
   "Triumph",
   "Harley-Davidson",
   "Aprilia",
-  "Moto Guzzi",
+  "i wiele innych marek",
 ] as const;
 
 export const IG_IMAGES = [
