@@ -765,6 +765,7 @@ h2.dark{
 
 .instagram {
   padding: 120px 48px;
+  background-color: var(--white);
 }
 
 .ig-header {
