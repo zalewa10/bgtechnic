@@ -83,7 +83,7 @@ export function Footer() {
           © 2026 BGTechnic Motocykle & BNTG Motocykle. Wszelkie prawa
           zastrzeżone.
         </p>
-        <p className="accent">Warsztat motocyklowy · Wysogotowo</p>
+        <p className="accent">Wykonanie: Krzysztof Zalewski</p>
       </div>
     </footer>
   );
