@@ -30,6 +30,9 @@ body {
   font-family: 'Barlow', sans-serif;
   overflow-x: hidden;
 }
+section{
+  overflow: hidden;
+}
 
 .nav {
   position: fixed;
@@ -970,7 +973,8 @@ h2.dark{
   font-size: 15px;
   outline: none;
   transition: border-color 0.2s;
-  width: 100%;
+  
+  box-sizing: border-box;
 }
 
 .form-group input:focus,
