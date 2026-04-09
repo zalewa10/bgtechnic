@@ -1,6 +1,11 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 
 export function Footer() {
+  const [showContactModal, setShowContactModal] = useState(false);
+
   return (
     <footer>
       <div className="footer-top">
@@ -83,8 +88,61 @@ export function Footer() {
           © 2026 BGTechnic Motocykle & BNTG Motocykle. Wszelkie prawa
           zastrzeżone.
         </p>
-        <p className="accent">Wykonanie: Krzysztof Zalewski</p>
+        <button
+          type="button"
+          className="footer-attribution accent"
+          onClick={() => setShowContactModal(true)}
+        >
+          Wykonanie: Krzysztof Zalewski
+        </button>
       </div>
+
+      {showContactModal && (
+        <div
+          className="footer-modal-backdrop"
+          role="presentation"
+          onClick={() => setShowContactModal(false)}
+        >
+          <div
+            className="footer-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="footer-modal-title"
+            aria-describedby="footer-modal-description"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="footer-modal-close"
+              aria-label="Zamknij okienko"
+              onClick={() => setShowContactModal(false)}
+            >
+              ×
+            </button>
+            <div className="section-label">Współpraca</div>
+            <h3 id="footer-modal-title" className="light">Potrzebujesz strony dla swojego biznesu?</h3>
+            <p id="footer-modal-description">
+              Napisz do mnie, a przygotuję nowoczesną stronę dopasowaną do Twojej
+              marki, oferty i stylu działania.
+            </p>
+            <a className="footer-modal-email" href="mailto:kontakt.kzalewski@gmail.com">
+              kontakt.kzalewski@gmail.com
+            </a>
+            <div className="footer-modal-actions">
+              <a className="btn-primary" href="mailto:kontakt.kzalewski@gmail.com">
+                Napisz maila
+              </a>
+              <button
+                type="button"
+                className="btn-outline"
+                onClick={() => setShowContactModal(false)}
+              >
+                Zamknij
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </footer>
   );
 }

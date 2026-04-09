@@ -15,6 +15,10 @@ type ContactFormState = {
   message: string;
 };
 
+type SubmitStatus = "idle" | "loading" | "success" | "error";
+
+const phoneRegex = /^\+?[0-9]+$/;
+
 const initialFormState: ContactFormState = {
   name: "",
   phone: "",
@@ -26,12 +30,65 @@ const initialFormState: ContactFormState = {
 };
 
 export function ContactSection({}: ContactSectionProps) {
-  const [formSent, setFormSent] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
+  const [submitMessage, setSubmitMessage] = useState("");
   const [form, setForm] = useState<ContactFormState>(initialFormState);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const normalizePhone = (value: string) => {
+    const sanitizedValue = value.replace(/[^0-9+]/g, "");
+
+    if (sanitizedValue.startsWith("+")) {
+      return `+${sanitizedValue.slice(1).replace(/\+/g, "")}`;
+    }
+
+    return sanitizedValue.replace(/\+/g, "");
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setFormSent(true);
+
+    if (!phoneRegex.test(form.phone)) {
+      setSubmitStatus("error");
+      setSubmitMessage("Telefon moze zawierac tylko cyfry i ewentualnie znak +.");
+      return;
+    }
+
+    setSubmitStatus("loading");
+    setSubmitMessage("Trwa wysyłanie zapytania...");
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const body = (await response.json()) as { error?: string };
+        throw new Error(body.error || "Nie udało się wysłać formularza.");
+      }
+
+      setSubmitStatus("success");
+      setSubmitMessage("Dziękujemy! Skontaktujemy się z Tobą wkrótce.");
+      setForm(initialFormState);
+    } catch (error) {
+      setSubmitStatus("error");
+      setSubmitMessage(
+        error instanceof Error && error.name === "AbortError"
+          ? "Przekroczono czas wysylki. Sprawdz ustawienia SMTP i sprobuj ponownie."
+          : error instanceof Error
+            ? error.message
+            : "Wystąpił błąd podczas wysyłki. Spróbuj ponownie.",
+      );
+    } finally {
+      clearTimeout(timeoutId);
+    }
   };
 
   return (
@@ -100,9 +157,9 @@ export function ContactSection({}: ContactSectionProps) {
         </div>
 
         <div className="reveal delayed">
-          {formSent ? (
+          {submitStatus === "success" ? (
             <div className="form-success">
-              ✓ Dziękujemy! Skontaktujemy się z Tobą wkrótce.
+              ✓ {submitMessage}
               <br />
               <span className="success-help">
                 Możesz też zadzwonić: 533 533 339
@@ -116,6 +173,7 @@ export function ContactSection({}: ContactSectionProps) {
                   <input
                     type="text"
                     required
+                    disabled={submitStatus === "loading"}
                     placeholder="Jan Kowalski"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -126,17 +184,23 @@ export function ContactSection({}: ContactSectionProps) {
                   <input
                     type="tel"
                     required
-                    placeholder="500 600 700"
+                    inputMode="tel"
+                    pattern="^[+]?[0-9]+$"
+                    title="Telefon może zawierać tylko cyfry i znak +"
+                    disabled={submitStatus === "loading"}
+                    placeholder="500600700"
                     value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    onChange={(e) => setForm({ ...form, phone: normalizePhone(e.target.value) })}
                   />
                 </div>
               </div>
 
               <div className="form-group">
-                <label>Email</label>
+                <label>Email *</label>
                 <input
                   type="email"
+                  required
+                  disabled={submitStatus === "loading"}
                   placeholder="jan@email.pl"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -148,6 +212,7 @@ export function ContactSection({}: ContactSectionProps) {
                 <input
                   type="text"
                   required
+                  disabled={submitStatus === "loading"}
                   placeholder="np. Honda CB500F 2020"
                   value={form.moto}
                   onChange={(e) => setForm({ ...form, moto: e.target.value })}
@@ -159,6 +224,7 @@ export function ContactSection({}: ContactSectionProps) {
                   <label>Rodzaj usługi *</label>
                   <select
                     required
+                    disabled={submitStatus === "loading"}
                     value={form.service}
                     onChange={(e) => setForm({ ...form, service: e.target.value })}
                   >
@@ -172,6 +238,7 @@ export function ContactSection({}: ContactSectionProps) {
                   <label>Preferowany termin</label>
                   <input
                     type="date"
+                    disabled={submitStatus === "loading"}
                     value={form.date}
                     onChange={(e) => setForm({ ...form, date: e.target.value })}
                   />
@@ -181,15 +248,30 @@ export function ContactSection({}: ContactSectionProps) {
               <div className="form-group">
                 <label>Opis problemu / uwagi</label>
                 <textarea
+                  disabled={submitStatus === "loading"}
                   placeholder="Opisz krótko problem lub co chcesz zrobić..."
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                 />
               </div>
 
-              <button type="submit" className="form-submit">
-                Wyślij zapytanie →
+              <button type="submit" className="form-submit" disabled={submitStatus === "loading"}>
+                {submitStatus === "loading" ? (
+                  <span className="form-submit-loading">
+                    <span className="form-spinner" aria-hidden="true" />
+                    Wysyłanie...
+                  </span>
+                ) : (
+                  "Wyślij zapytanie →"
+                )}
               </button>
+
+              {submitStatus === "error" && (
+                <p className="form-error" role="alert">
+                  {submitMessage}
+                </p>
+              )}
+
               <p className="form-footnote">
                 Możesz też zadzwonić bezpośrednio:
                 <a href="tel:533533339"> 533 533 339</a>
